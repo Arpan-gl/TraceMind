@@ -1,0 +1,19 @@
+{
+  "title": "Queue Health",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "RabbitMQ Queue Depth",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rabbitmq_queue_messages_ready",
+          "legendFormat": "{{queue}}"
+        }
+      ]
+    }
+  ]
+}

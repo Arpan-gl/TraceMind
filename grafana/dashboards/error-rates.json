@@ -1,0 +1,19 @@
+{
+  "title": "Error Rates",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Error Ratio",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(inference_requests_total{status=\"error\"}[5m])) / sum(rate(inference_requests_total[5m]))",
+          "legendFormat": "error ratio"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "title": "Token Usage",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Input vs Output Tokens",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "rate(inference_tokens_total{type=\"input\"}[5m])", "legendFormat": "input / {{provider}}" },
+        { "expr": "rate(inference_tokens_total{type=\"output\"}[5m])", "legendFormat": "output / {{provider}}" }
+      ]
+    }
+  ]
+}

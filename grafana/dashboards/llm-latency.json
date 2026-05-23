@@ -1,0 +1,19 @@
+{
+  "title": "LLM Latency",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "histogram",
+      "title": "Inference Latency",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(inference_latency_seconds_bucket[5m])) by (le, provider, model))",
+          "legendFormat": "{{provider}} / {{model}}"
+        }
+      ]
+    }
+  ]
+}
