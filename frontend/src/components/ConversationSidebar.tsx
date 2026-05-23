@@ -19,6 +19,7 @@ export function ConversationSidebar() {
     startConversation,
     openConversation,
     removeConversation,
+    signOut,
   } = useAppContext();
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
@@ -33,11 +34,22 @@ export function ConversationSidebar() {
   }
 
   return (
-    <aside className="flex w-full shrink-0 flex-col border-r border-slate-200 bg-slate-950 text-white lg:w-72">
+    <aside className="flex w-full shrink-0 flex-col border-r border-slate-800 bg-slate-950 text-slate-100 lg:w-72">
       <div className="p-4">
-        <Button type="button" onClick={() => void startConversation()} className="w-full bg-sky-500 hover:bg-sky-400">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.35em] text-sky-300">TraceMind</p>
+            <div className="text-xs text-slate-400">AI Assistant</div>
+          </div>
+          <Button type="button" className="bg-white/6 hover:bg-white/8" onClick={() => void signOut}>
+            Sign out
+          </Button>
+        </div>
+        <div className="mt-4">
+          <Button type="button" onClick={() => void startConversation()} className="w-full bg-sky-600 hover:bg-sky-500">
           New Chat
         </Button>
+        </div>
       </div>
       <div className="flex-1 overflow-hidden px-3 pb-3">
         <ScrollArea className="h-full pr-1">

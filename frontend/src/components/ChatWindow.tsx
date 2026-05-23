@@ -96,7 +96,7 @@ export function ChatWindow() {
   );
 
   return (
-    <section className="flex h-full flex-1 flex-col bg-slate-50 text-slate-900">
+    <section className="flex h-full flex-1 flex-col bg-slate-900 text-slate-100">
       <div className="border-b border-slate-200 px-6 py-4">
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -119,13 +119,13 @@ export function ChatWindow() {
         ) : (
           <div className="space-y-4">
             {visibleMessages.map((message) => (
-              <div
-                key={message.id}
-                className={message.role === "user" ? "ml-auto max-w-2xl rounded-3xl bg-sky-600 px-4 py-3 text-white" : "max-w-2xl rounded-3xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200"}
-              >
-                <p className="whitespace-pre-wrap text-sm leading-6">{message.content}</p>
-              </div>
-            ))}
+                <div
+                  key={message.id}
+                  className={message.role === "user" ? "ml-auto max-w-2xl rounded-3xl bg-sky-600 px-4 py-3 text-white" : "max-w-2xl rounded-3xl bg-slate-800 px-4 py-3 shadow-sm ring-1 ring-slate-700 text-slate-100"}
+                >
+                  <p className="whitespace-pre-wrap text-sm leading-6">{message.content}</p>
+                </div>
+              ))}
             {isStreaming ? (
               <div className="max-w-2xl rounded-3xl bg-white px-4 py-3 shadow-sm ring-1 ring-slate-200">
                 <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -140,7 +140,7 @@ export function ChatWindow() {
         )}
       </ScrollArea>
       <Separator />
-      <form onSubmit={handleSend} className="border-t border-slate-200 bg-white p-4">
+      <form onSubmit={handleSend} className="border-t border-slate-800 bg-slate-900 p-4">
         <div className="flex items-end gap-3">
           <Textarea value={draft} onChange={(event) => setDraft(event.target.value)} rows={3} placeholder="Send a message" />
           <Button type="submit" disabled={!activeConversationId || isStreaming}>

@@ -1,5 +1,6 @@
 # Ignore the environment variables file
 .env
+dist
 
 # Ignore dependency folders
 node_modules/

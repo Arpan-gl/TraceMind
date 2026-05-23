@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import random
 
 import aio_pika
 from pydantic import ValidationError
@@ -58,12 +59,31 @@ async def _handle_message(message: aio_pika.IncomingMessage) -> None:
 
 async def main() -> None:
     settings = get_settings()
-    connection = await aio_pika.connect_robust(settings.rabbitmq_url)
-    async with connection:
-        channel = await connection.channel()
-        queue = await channel.declare_queue("inference_logs", durable=True)
-        await queue.consume(_handle_message)
-        await asyncio.Event().wait()
+    # Resilient connection loop with exponential backoff and jitter.
+    backoff = 1.0
+    max_backoff = 60.0
+    while True:
+        try:
+            logger.info("connecting to RabbitMQ at %s", settings.rabbitmq_url)
+            connection = await aio_pika.connect_robust(settings.rabbitmq_url)
+            async with connection:
+                channel = await connection.channel()
+                queue = await channel.declare_queue("inference_logs", durable=True)
+                await queue.consume(_handle_message)
+                logger.info("connected to RabbitMQ and consuming from inference_logs")
+                # Reset backoff after successful connect
+                backoff = 1.0
+                # Wait forever until the connection is lost or cancelled
+                await asyncio.Event().wait()
+        except asyncio.CancelledError:
+            # allow clean shutdown
+            raise
+        except Exception:
+            logger.exception("failed to connect/consume from RabbitMQ, retrying in %.1fs", backoff)
+            # sleep with jitter
+            jitter = random.random() * 0.5 * backoff
+            await asyncio.sleep(backoff + jitter)
+            backoff = min(backoff * 2, max_backoff)
 
 
 if __name__ == "__main__":
