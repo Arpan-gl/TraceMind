@@ -10,7 +10,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "sum(rate(inference_requests_total{status=\"error\"}[5m])) / sum(rate(inference_requests_total[5m]))",
+          "expr": "sum(rate(inference_requests_total{status=\"error\"}[5m])) / clamp_min(sum(rate(inference_requests_total[5m])), 1)",
           "legendFormat": "error ratio"
         }
       ]

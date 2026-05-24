@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import random
+import time
 
 import aio_pika
 from pydantic import ValidationError
+from prometheus_client import start_http_server
 
 from app.core.config import get_settings
 from app.core.db import async_session_factory
-from app.core.observability import inference_latency_seconds, inference_requests_total, inference_tokens_total
+from app.core.observability import ingestion_duration_seconds, ingestion_events_total
 from app.models.inference_log import InferenceLog
 from app.schemas import InferenceLogPayload
 
@@ -38,27 +39,35 @@ async def _persist_payload(payload: InferenceLogPayload) -> None:
 
 
 async def _handle_message(message: aio_pika.IncomingMessage) -> None:
+    start_time = time.perf_counter()
+    message_status = "success"
     async with message.process(ignore_processed=True, requeue=False):
         try:
             payload = InferenceLogPayload.model_validate_json(message.body)
         except ValidationError as exc:
+            message_status = "invalid"
             logger.exception("invalid telemetry payload: %s", exc)
+            ingestion_events_total.labels(message_status).inc()
+            ingestion_duration_seconds.labels(message_status).observe(time.perf_counter() - start_time)
             return
 
         try:
             await _persist_payload(payload)
         except Exception:
+            message_status = "error"
             logger.exception("failed to persist telemetry payload")
+            ingestion_events_total.labels(message_status).inc()
+            ingestion_duration_seconds.labels(message_status).observe(time.perf_counter() - start_time)
             raise
 
-        inference_requests_total.labels(payload.provider, payload.model, payload.status).inc()
-        inference_latency_seconds.labels(payload.provider, payload.model).observe(payload.latency_ms / 1000.0)
-        inference_tokens_total.labels("input", payload.provider).inc(payload.tokens_input)
-        inference_tokens_total.labels("output", payload.provider).inc(payload.tokens_output)
+        ingestion_events_total.labels(message_status).inc()
+        ingestion_duration_seconds.labels(message_status).observe(time.perf_counter() - start_time)
 
 
 async def main() -> None:
     settings = get_settings()
+    start_http_server(settings.worker_metrics_port)
+    logger.info("worker metrics listening on :%s", settings.worker_metrics_port)
     # Resilient connection loop with exponential backoff and jitter.
     backoff = 1.0
     max_backoff = 60.0

@@ -33,7 +33,7 @@ class ConversationRead(BaseModel):
 class ChatStreamRequest(BaseModel):
     message: str = Field(min_length=1)
     provider: str = Field(default="groq")
-    model: str = Field(default="llama-3-8b-8192")
+    model: str = Field(default="llama-3.1-8b-instant")
     session_id: UUID
 
 

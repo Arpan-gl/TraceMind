@@ -7,7 +7,7 @@ services:
       VITE_API_BASE_URL: http://localhost:8000
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
 
   backend:
     build: ./backend
@@ -21,13 +21,24 @@ services:
       RABBITMQ_URL: ${RABBITMQ_URL}
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_INGEST_SECRET: ${INTERNAL_INGEST_SECRET}
+      DAILY_TOKEN_LIMIT: ${DAILY_TOKEN_LIMIT:-10000}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      DEFAULT_GROQ_MODEL: ${DEFAULT_GROQ_MODEL:-llama-3.1-8b-instant}
+      MAX_COMPLETION_TOKENS: ${MAX_COMPLETION_TOKENS:-1024}
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
 
   worker:
     build: ./backend
@@ -38,15 +49,18 @@ services:
       RABBITMQ_URL: ${RABBITMQ_URL}
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_INGEST_SECRET: ${INTERNAL_INGEST_SECRET}
+      WORKER_METRICS_PORT: 9100
+    expose:
+      - "9100"
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       postgres:
-        condition: service_started
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
 
   postgres:
@@ -104,6 +118,8 @@ services:
       - "9090:9090"
     depends_on:
       backend:
+        condition: service_healthy
+      worker:
         condition: service_started
       rabbitmq-exporter:
         condition: service_started

@@ -11,7 +11,11 @@
       "targets": [
         {
           "expr": "sum(rate(inference_requests_total[5m]))",
-          "legendFormat": "requests/sec"
+          "legendFormat": "inference requests/sec"
+        },
+        {
+          "expr": "sum(rate(http_requests_total[5m]))",
+          "legendFormat": "api requests/sec"
         }
       ]
     }

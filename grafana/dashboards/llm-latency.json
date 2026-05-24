@@ -5,8 +5,8 @@
   "refresh": "5s",
   "panels": [
     {
-      "type": "histogram",
-      "title": "Inference Latency",
+      "type": "timeseries",
+      "title": "Inference Latency p95",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "targets": [
         {

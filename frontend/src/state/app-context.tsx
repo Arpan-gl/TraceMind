@@ -27,7 +27,7 @@ interface AppContextValue {
   signOut: () => void;
   refreshConversations: () => Promise<void>;
   openConversation: (conversationId: string) => Promise<void>;
-  startConversation: () => Promise<void>;
+  startConversation: () => Promise<Conversation>;
   removeConversation: (conversationId: string) => Promise<void>;
   setError: (error: string | null) => void;
 }
@@ -75,12 +75,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   async function refreshConversations(): Promise<void> {
     setLoadingConversations(true);
+    setError(null);
     try {
       const items = await listConversations();
       setConversations(items);
       if (!activeConversationId && items.length > 0) {
-        setActiveConversationId(items[0].id);
+        await openConversation(items[0].id);
       }
+    } catch (refreshError) {
+      setError(refreshError instanceof Error ? refreshError.message : "Could not load conversations");
     } finally {
       setLoadingConversations(false);
     }
@@ -97,10 +100,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function startConversation(): Promise<void> {
-    const conversation = await createConversation("New conversation");
-    setConversations((current) => [conversation, ...current]);
-    await openConversation(conversation.id);
+  async function startConversation(): Promise<Conversation> {
+    setLoadingConversations(true);
+    setError(null);
+    try {
+      const conversation = await createConversation("New conversation");
+      setConversations((current) => [conversation, ...current.filter((item) => item.id !== conversation.id)]);
+      await openConversation(conversation.id);
+      return conversation;
+    } catch (startError) {
+      setError(startError instanceof Error ? startError.message : "Could not start a new chat");
+      throw startError;
+    } finally {
+      setLoadingConversations(false);
+    }
   }
 
   async function removeConversation(conversationId: string): Promise<void> {

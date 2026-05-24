@@ -14,7 +14,7 @@ down_revision = None
 branch_labels = None
 depends_on = None
 
-message_role = sa.Enum("user", "assistant", "system", name="message_role")
+message_role = postgresql.ENUM("user", "assistant", "system", name="message_role", create_type=False)
 
 
 def upgrade() -> None:

@@ -11,7 +11,7 @@ import type { Message } from "../lib/types";
 import { useAppContext } from "../state/app-context";
 
 export function ChatWindow() {
-  const { activeConversationId, messages, loadingMessages } = useAppContext();
+  const { activeConversationId, messages, loadingMessages, startConversation } = useAppContext();
   const [draft, setDraft] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamText, setStreamText] = useState("");
@@ -25,13 +25,24 @@ export function ChatWindow() {
 
   async function handleSend(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!activeConversationId || !draft.trim() || isStreaming) {
+    if (!draft.trim() || isStreaming) {
       return;
+    }
+
+    let conversationId = activeConversationId;
+    if (!conversationId) {
+      try {
+        const conversation = await startConversation();
+        conversationId = conversation.id;
+      } catch (conversationError) {
+        setError(conversationError instanceof Error ? conversationError.message : "Could not start a new chat");
+        return;
+      }
     }
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
-      conversation_id: activeConversationId,
+      conversation_id: conversationId,
       role: "user",
       content: draft,
       token_count: Math.max(1, Math.ceil(draft.length / 4)),
@@ -50,11 +61,11 @@ export function ChatWindow() {
 
     try {
       await streamChatResponse(
-        `${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000"}/chat/${activeConversationId}/stream`,
+        `${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000"}/chat/${conversationId}/stream`,
         {
           message: userMessage.content,
           provider: "groq",
-          model: "llama-3-8b-8192",
+          model: "llama-3.1-8b-instant",
           session_id: crypto.randomUUID(),
         },
         (chunk) => {
@@ -67,7 +78,7 @@ export function ChatWindow() {
         ...current,
         {
           id: crypto.randomUUID(),
-          conversation_id: activeConversationId,
+          conversation_id: conversationId,
           role: "assistant",
           content: assistantText,
           token_count: Math.max(1, Math.ceil(assistantText.length / 4)),
@@ -143,7 +154,7 @@ export function ChatWindow() {
       <form onSubmit={handleSend} className="border-t border-slate-800 bg-slate-900 p-4">
         <div className="flex items-end gap-3">
           <Textarea value={draft} onChange={(event) => setDraft(event.target.value)} rows={3} placeholder="Send a message" />
-          <Button type="submit" disabled={!activeConversationId || isStreaming}>
+          <Button type="submit" disabled={!draft.trim() || isStreaming}>
             Send
           </Button>
         </div>

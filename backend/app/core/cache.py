@@ -46,3 +46,8 @@ async def increment_daily_quota(user_id: UUID, tokens: int) -> int:
     midnight = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
     await redis_client.expireat(key, int(midnight.timestamp()))
     return total
+
+
+async def get_daily_quota(user_id: UUID) -> int:
+    raw_total = await redis_client.get(_quota_key(user_id))
+    return int(raw_total or 0)

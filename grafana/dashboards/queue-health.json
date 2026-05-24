@@ -10,7 +10,7 @@
       "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "rabbitmq_queue_messages_ready",
+          "expr": "rabbitmq_queue_messages_ready{queue=~\"inference_logs.*\"}",
           "legendFormat": "{{queue}}"
         }
       ]

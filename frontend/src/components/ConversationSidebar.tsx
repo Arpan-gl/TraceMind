@@ -16,6 +16,7 @@ export function ConversationSidebar() {
     conversations,
     activeConversationId,
     loadingConversations,
+    error,
     startConversation,
     openConversation,
     removeConversation,
@@ -41,15 +42,16 @@ export function ConversationSidebar() {
             <p className="text-sm uppercase tracking-[0.35em] text-sky-300">TraceMind</p>
             <div className="text-xs text-slate-400">AI Assistant</div>
           </div>
-          <Button type="button" className="bg-white/6 hover:bg-white/8" onClick={() => void signOut}>
+          <Button type="button" className="bg-white/6 hover:bg-white/8" onClick={signOut}>
             Sign out
           </Button>
         </div>
         <div className="mt-4">
-          <Button type="button" onClick={() => void startConversation()} className="w-full bg-sky-600 hover:bg-sky-500">
+          <Button type="button" onClick={() => void startConversation()} disabled={loadingConversations} className="w-full bg-sky-600 hover:bg-sky-500">
           New Chat
         </Button>
         </div>
+        {error ? <p className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">{error}</p> : null}
       </div>
       <div className="flex-1 overflow-hidden px-3 pb-3">
         <ScrollArea className="h-full pr-1">

@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     internal_ingest_secret: str = Field(alias="INTERNAL_INGEST_SECRET")
     jwt_expiry_hours: int = 24
     app_name: str = "TraceMind"
+    daily_token_limit: int = 10_000
+    allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+    worker_metrics_port: int = 9100
+    default_groq_model: str = "llama-3.1-8b-instant"
+    max_completion_tokens: int = 1024
 
 
 @lru_cache(maxsize=1)

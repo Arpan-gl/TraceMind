@@ -1,6 +1,7 @@
 # Ignore the environment variables file
 .env
 dist
+.venv
 
 # Ignore dependency folders
 node_modules/
