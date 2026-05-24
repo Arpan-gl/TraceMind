@@ -1,5 +1,4 @@
 from collections.abc import AsyncGenerator
-from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import Depends, Header, HTTPException, status
@@ -8,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.db import get_db
-from app.models.user import User
 
 
 async def db_session() -> AsyncGenerator[AsyncSession, None]:

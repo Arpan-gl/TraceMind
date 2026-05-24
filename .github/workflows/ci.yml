@@ -28,7 +28,7 @@ jobs:
           pip install -e backend[dev]
       - name: Lint (ruff)
         run: |
-          ruff check backend
+          python -m ruff check backend
       - name: Run backend tests
         run: |
           pytest -q backend
