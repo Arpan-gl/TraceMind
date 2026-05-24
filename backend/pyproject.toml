@@ -29,6 +29,11 @@ dependencies = [
   "psycopg2-binary>=2.9.6",
 ]
 
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+]
+
 [tool.setuptools]
 package-dir = {"" = "."}
 
